@@ -1,5 +1,5 @@
 # HarvestShield
-**Live demo:** https://harvestshield-alpha.vercel.app/
+
 An index insurance simulator for Nigerian maize and groundnut farmers, built on FAO crop-water methods.
 
 Pick a location, crop, planting date, soil and farm size. HarvestShield pulls 30 years of daily rainfall and FAO reference evapotranspiration, works out how much of the crop's water need the rain actually met in every growth stage, estimates the yield loss, and shows what a policy would have paid each season and what the cover should cost. No claim forms: the weather data decides the payout.
@@ -62,7 +62,7 @@ Back-test on real Open-Meteo data (run 28 October 2026, 30 seasons 1997 to 2026,
 | Kaduna, maize, 1 June | 1 of 30 | 0.65% | 0.88% |
 | Kaduna, groundnut, 1 June | 1 of 30 | 0.70% | 0.95% |
 
-The same dry seasons show up across places (2021 in Makurdi and Kaduna, 2024 in Enugu and Makurdi), and most payouts come from water shortage in the first 20 days after planting. That is why the app includes a planting-date view: the premium depends heavily on when the crop goes in. These results are not validated against recorded yields.
+The same dry seasons show up across places (2021 in Makurdi and Kaduna, 2024 in Enugu and Makurdi), and most payouts come from water shortage in the first 20 days after planting. That is why the app includes a planting-date view: the premium depends heavily on when the crop goes in. These results did not correlate with national recorded yields (see Validation result).
 
 ## Validate against recorded yields
 
@@ -71,6 +71,18 @@ node scripts/validate.mjs 7.7337 8.5214 05-15 loamy_sand maize benue_maize.csv
 ```
 
 `yields.csv` is a header line followed by `year,yield` rows for the same crop and area. The script removes a straight-line trend from the recorded yields, because seeds, fertiliser and area change them over time, then prints the recorded-to-trend ratio next to the model's yield ratio and their Pearson correlation. The check needs at least 8 years that overlap the weather data. State-level series match a point simulation better than national ones. This has not been run against real yields yet.
+
+## Validation result (30 October 2026)
+
+The model's yield ratio was compared with FAOSTAT national maize yields for Nigeria (1996 to 2024, kg/ha) after removing a straight-line trend. 28 years overlap.
+
+| Location, planting date | Pearson correlation |
+| --- | --- |
+| Makurdi, 15 May | -0.01 |
+| Kaduna, 1 June | -0.04 |
+| Enugu, 15 April | -0.13 |
+
+**Reading:** no relationship. With 28 years, a correlation would need to be about 0.37 or more to be distinguishable from chance, so the three values are consistent with none. This does not validate the model against national yields. Likely reasons, not tested: the yields are national while the model is one point; the model reports no yield loss in many seasons (16 of 28 at Enugu, 9 of 28 at Makurdi); national yields are also driven by inputs, area, insecurity and floods, none of which are modelled; and the 2022 to 2024 yield values come from an external organisation. The model's worst simulated seasons (for example 2021 at Kaduna and Makurdi, 2024 at Enugu and Makurdi) were not low-yield years in the national series. The next test is state-level yields.
 
 ## Run and deploy
 
@@ -114,3 +126,11 @@ scripts/          real-data verification script
 ## Resume line
 
 > Built HarvestShield, an index insurance simulator that applies FAO-56 soil water balance and FAO-33 yield response to 30 years of ERA5 rainfall and evapotranspiration data to estimate maize and groundnut yield loss and price drought cover for Nigerian smallholder farmers (vanilla JS, Open-Meteo API, unit-tested, deployed on Vercel).
+
+## Data included
+
+`data/nigeria_maize_yield_faostat.csv`: Nigeria national maize yield in kg/ha, 1996 to 2024, downloaded from FAOSTAT (QCL domain, element Yield) on 30 October 2026. Flags: official values through 2018 and 2020 to 2021, estimated 2019, external-organisation values 2022 to 2024. National figures average over very different climates, so compare them with several locations rather than one.
+
+```bash
+node scripts/validate.mjs 7.7337 8.5214 05-15 loamy_sand maize data/nigeria_maize_yield_faostat.csv
+```

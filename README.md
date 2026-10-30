@@ -1,5 +1,5 @@
 # HarvestShield
-
+**Live demo:** https://harvestshield-alpha.vercel.app/
 An index insurance simulator for Nigerian maize and groundnut farmers, built on FAO crop-water methods.
 
 Pick a location, crop, planting date, soil and farm size. HarvestShield pulls 30 years of daily rainfall and FAO reference evapotranspiration, works out how much of the crop's water need the rain actually met in every growth stage, estimates the yield loss, and shows what a policy would have paid each season and what the cover should cost. No claim forms: the weather data decides the payout.

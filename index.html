@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HarvestShield: rainfall-index crop cover simulator</title>
+  <meta name="description" content="Replay 30 years of real rainfall and crop water demand against a crop insurance policy, and see what it would have paid each season and what it should cost.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230E2A33'/%3E%3Cpath d='M16 6c4 5.5 7 9 7 12.5a7 7 0 0 1-14 0C9 15 12 11.5 16 6z' fill='%231B6CA8'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="top">
+    <header class="masthead">
+      <div class="wrap masthead-row">
+        <span class="brand">
+          <svg width="22" height="22" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 4c4.6 6.3 8 10.3 8 14.5a8 8 0 0 1-16 0C8 14.3 11.4 10.3 16 4z" fill="currentColor"/></svg>
+          HarvestShield
+        </span>
+        <span class="masthead-note">Research prototype. Not a licensed insurance product.</span>
+      </div>
+    </header>
+
+    <section class="wrap hero">
+      <div class="hero-copy">
+        <h1>When the rain fails, the payout shouldn't wait for a claim form.</h1>
+        <p class="lede">Pick a farm and a planting date. HarvestShield replays 30 years of real rainfall and crop water demand, estimates the yield hit in each season using FAO methods, and shows what a policy would have paid and what that cover should cost.</p>
+      </div>
+      <figure class="hero-fig">
+        <svg id="hero-art" role="img" aria-label="Yield sensitivity to water stress by growth stage"></svg>
+        <figcaption id="hero-cap"></figcaption>
+      </figure>
+    </section>
+  </div>
+
+  <div class="wrap layout">
+    <form id="form" class="panel" novalidate autocomplete="off">
+      <h2 class="panel-title">Your farm</h2>
+
+      <div class="field">
+        <label for="loc-select">Location</label>
+        <select id="loc-select"><option value="">Choose a town…</option></select>
+        <div class="combo" id="search-box" hidden>
+          <label for="loc">Search for your town</label>
+          <input id="loc" type="text" placeholder="Type a town or city in Nigeria" role="combobox" aria-expanded="false" aria-controls="loc-list" aria-autocomplete="list" spellcheck="false">
+          <ul id="loc-list" class="suggestions" role="listbox" hidden></ul>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="crop">Crop</label>
+        <select id="crop"></select>
+        <p class="hint">Only crops with published FAO coefficients are included.</p>
+      </div>
+
+      <div class="field">
+        <label for="soil">Soil</label>
+        <select id="soil"></select>
+        <p class="hint">Pick the closest match. Sandy soil holds less water, so dry spells hit sooner.</p>
+      </div>
+
+      <fieldset class="field">
+        <legend>Planting date</legend>
+        <div class="row2">
+          <select id="plant-month" aria-label="Planting month"></select>
+          <input id="plant-day" type="number" min="1" max="31" inputmode="numeric" value="15" aria-label="Planting day">
+        </div>
+        <p class="hint">The same day is used in every past year.</p>
+      </fieldset>
+
+      <div class="field">
+        <label for="area">Farm size (hectares)</label>
+        <input id="area" type="number" min="0.1" step="0.1" value="2" inputmode="decimal">
+      </div>
+
+      <div class="field">
+        <label for="per-ha">Cover per hectare (₦)</label>
+        <input id="per-ha" type="number" min="1000" step="10000" value="500000" inputmode="numeric">
+        <p class="hint">Roughly what it costs you to farm one hectare. This is the most the policy can pay.</p>
+      </div>
+
+      <button id="run" class="btn" type="submit">Run simulation</button>
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+    </form>
+
+    <main id="results" class="results" tabindex="-1">
+      <div class="empty">
+        <svg class="empty-art" viewBox="0 0 220 90" aria-hidden="true">
+          <g fill="none" stroke="currentColor" stroke-width="1.5">
+            <line x1="6" y1="82" x2="214" y2="82"/>
+          </g>
+          <g fill="currentColor">
+            <rect x="12" y="62" width="9" height="20" opacity=".35"/><rect x="26" y="74" width="9" height="8" opacity=".35"/>
+            <rect x="40" y="70" width="9" height="12" opacity=".35"/><rect x="54" y="30" width="9" height="52" class="gold"/>
+            <rect x="68" y="76" width="9" height="6" opacity=".35"/><rect x="82" y="72" width="9" height="10" opacity=".35"/>
+            <rect x="96" y="78" width="9" height="4" opacity=".35"/><rect x="110" y="48" width="9" height="34" class="gold"/>
+            <rect x="124" y="74" width="9" height="8" opacity=".35"/><rect x="138" y="76" width="9" height="6" opacity=".35"/>
+            <rect x="152" y="68" width="9" height="14" opacity=".35"/><rect x="166" y="78" width="9" height="4" opacity=".35"/>
+            <rect x="180" y="22" width="9" height="60" class="gold"/><rect x="194" y="74" width="9" height="8" opacity=".35"/>
+          </g>
+        </svg>
+        <h2>Your 30-season ledger appears here</h2>
+        <p>Choose a location, then select <strong>Run simulation</strong>. You'll see which past years the policy would have paid, the water shortfall behind each payout, and the yearly premium.</p>
+      </div>
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="wrap">
+      <p>Weather data: <a href="https://open-meteo.com/" rel="noopener">Open-Meteo.com</a> (ERA5 reanalysis, CC BY 4.0). Place search by Open-Meteo geocoding. Crop and soil parameters: FAO Irrigation and Drainage Papers 56 and 33, listed with links on the results page.</p>
+      <p>Reproducible: every figure can be rebuilt from the public data with the verification script and CSV export that ship with the source code.</p>
+      <p>This is a simulation for learning and research. It is not insurance, and real cover in Nigeria must come from a NAICOM-licensed insurer.</p>
+    </div>
+  </footer>
+
+  <noscript><p class="wrap">HarvestShield needs JavaScript to fetch rainfall and run the simulation.</p></noscript>
+  <script src="src/logic.js"></script>
+  <script src="src/app.js"></script>
+</body>
+</html>
